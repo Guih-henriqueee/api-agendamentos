@@ -21,14 +21,14 @@ app.register(fastifySwagger, {
         info: {
             title: 'Agendamentos API',
             description: 'Backend - Painel de Agendamentos',
-            version: '0.0.1v beta',
+            version: '0.0.2v beta - Last update 03/04/2025',
             contact: {
                 name: 'Guilherme Martins',
                 url: 'https://github.com/guih-henriqueee',
                 email: 'gmartinsdevelop@gmail.com',
 
+                
             },
-
 
         },
         components: {
