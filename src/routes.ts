@@ -5,6 +5,7 @@ import fastifyMultipart from "@fastify/multipart";
 import { User, Agendamento } from './schema/interfaces'
 import { createDeflate } from "node:zlib";
 import { create } from "node:domain";
+import { GetAuth, validateToken } from './auth/functionAuth'
 
 // Banco de dados simulado
 const users: User[] = [];
@@ -36,106 +37,127 @@ export async function RouteUsers(app: FastifyInstance) {
         },
         async () => users
     );
+    //  Rota para criar usuário
 
-    // 🔹 Rota para criar usuário
     app.post("/users", {
         schema: {
-          description: "Create a new user",
-          tags: ["Users"],
-          body: z.object({
-            name: z.string().min(3, "Name must be at least 3 characters long"),
-            email: z.string().email("Invalid email format"),
-            password: z.string().min(6, "Password must be at least 6 characters long")
-          }),
-          response: {
-            201: z.object({
-              id: z.string(),
-              name: z.string(),
-              email: z.string(),
+            description: "Create a new user",
+            tags: ["Users"],
+            body: z.object({
+                name: z.string().min(3, "Name must be at least 3 characters long").describe("Nome do usuário"),
+                email: z.string().email("Invalid email format").describe("Email do usuário"),
+                password: z.string().min(6, "Password must be at least 6 characters long").describe("Senha do usuário"),
+                cpf: z.string().min(11, "CPF must be at least 11 characters long").describe("CPF do usuário"),
             }),
-            400: z.object({
-              message: z.string(),
-              error: z.string(),
-              statusCode: z.number(),
-            }),
-          },
+            response: {
+                201: z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    email: z.string(),
+                    token: z.string(),
+                }),
+                400: z.object({
+                    message: z.string(),
+                    error: z.string(),
+                    statusCode: z.number(),
+                }),
+            },
         },
-      }, (request, reply) => {
-        const { name, email, password } = request.body as { name: string; email: string; password: string };
-        
+    }, (request, reply) => {
+        const { name, email, password, cpf } = request.body as { name: string; email: string; password: string; cpf: string };
+
+        // Verifica se o CPF já existe
+        const cpfExists = users.find((user) => user.cpf === cpf);
+        if (cpfExists) {
+            return reply.status(400).send({ message: "CPF already exists" });
+        }
+
+        // Verifica se o email já existe
+        const emailExists = users.find((user) => user.email === email);
+        if (emailExists) {
+            return reply.status(400).send({ message: "Email already exists" });
+        }
+
+        // Gerando o token para o usuário
+        const userToken = GetAuth(email, randomUUID(), cpf);
+
+        // Criando o novo usuário
         const newUser: User = {
-          id: randomUUID(),
-          name,
-          email,
-          password,
-          createdAt: new Date(), // Correctly set during creation
-          updatedAt: new Date(), // Initially same as createdAt
+            id: randomUUID(),
+            name,
+            email,
+            cpf,
+            password,
+            token: userToken,
+            createdAt: new Date(), // Correctly set during creation
+            updatedAt: new Date(), // Initially same as createdAt
         };
-      
+
+        // Adicionando o usuário ao banco (aqui é uma simulação)
         users.push(newUser);
+
+        // Retorna o novo usuário com o token gerado
         return reply.status(201).send(newUser);
-      });
+    });
 
 
+    //  Rota para atualizar usuário
+    app.put("/users/:id", {
+        schema: {
+            description: "Update a user",
+            tags: ["Users"],
+            params: z.object({ id: z.string().uuid("Invalid UUID format") }),
+            body: z.object({
+                name: z.string().min(3, "Name must be at least 3 characters long"),
+                email: z.string().email("Invalid email format"),
+                password: z.string().min(6, "Password must be at least 6 characters long"),
+                updatedAt: z.date().default(new Date()), // updatedAt should be updated on each modification
+            }),
+            response: {
+                200: z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    email: z.string(),
+                }),
+                400: z.object({
+                    message: z.string(),
+                    error: z.string(),
+                    statusCode: z.number(),
+                }),
+                404: z.object({
+                    message: z.string(),
+                    error: z.string(),
+                    statusCode: z.number(),
+                }),
+            },
+        },
+    }, (request, reply) => {
+        const { id } = request.params as { id: string };
+        const { name, email, password, updatedAt } = request.body as { name: string; email: string; password: string; updatedAt: Date };
 
-    // 🔹 Rota para atualizar usuário
-    // PUT /users/:id
-app.put("/users/:id", {
-    schema: {
-      description: "Update a user",
-      tags: ["Users"],
-      params: z.object({ id: z.string().uuid("Invalid UUID format") }),
-      body: z.object({
-        name: z.string().min(3, "Name must be at least 3 characters long"),
-        email: z.string().email("Invalid email format"),
-        password: z.string().min(6, "Password must be at least 6 characters long"),
-        updatedAt: z.date().default(new Date()), // updatedAt should be updated on each modification
-      }),
-      response: {
-        200: z.object({
-          id: z.string(),
-          name: z.string(),
-          email: z.string(),
-        }),
-        400: z.object({
-          message: z.string(),
-          error: z.string(),
-          statusCode: z.number(),
-        }),
-        404: z.object({
-          message: z.string(),
-          error: z.string(),
-          statusCode: z.number(),
-        }),
-      },
-    },
-  }, (request, reply) => {
-    const { id } = request.params as { id: string };
-    const { name, email, password, updatedAt } = request.body as { name: string; email: string; password: string; updatedAt: Date };
-  
-    const userIndex = users.findIndex((user) => user.id === id);
-    if (userIndex === -1) {
-      return reply.status(404).send({
-        message: "User not found",
-        error: "Not Found",
-        statusCode: 404,
-      });
-    }
-  
-    const nameOrEmailExists = users.some((user) => (user.name === name || user.email === email) && user.id !== id);
-    if (nameOrEmailExists) {
-      return reply.status(400).send({
-        message: "Name or email already exists",
-        error: "Bad Request",
-        statusCode: 400,
-      });
-    }
-  
-    users[userIndex] = { id, name, email, password, createdAt: users[userIndex].createdAt, updatedAt };
-  
-    return reply.status(200).send({ id, name, email });
-  });
-  
+        const userIndex = users.findIndex((user) => user.id === id);
+        if (userIndex === -1) {
+            return reply.status(404).send({
+                message: "User not found",
+                error: "Not Found",
+                statusCode: 404,
+            });
+        }
+
+        const nameOrEmailExists = users.some((user) => (user.name === name || user.email === email) && user.id !== id);
+        if (nameOrEmailExists) {
+            return reply.status(400).send({
+                message: "Name or email already exists",
+                error: "Bad Request",
+                statusCode: 400,
+            });
+        }
+
+        users[userIndex] = { id, name, email, password, cpf: users[userIndex].cpf , createdAt: users[userIndex].createdAt, updatedAt, token: users[userIndex].token };
+
+        return reply.status(200).send({ id, name, email });
+    });
+
 
     // 🔹 Rota para deletar usuário
     app.delete(
@@ -212,149 +234,149 @@ export async function RouteAgendamentos(app: FastifyInstance) {
 
     // 🔹 Rota para criar Agendamento
     // POST /Agendamentos
-app.post("/Agendamentos", {
-    schema: {
-      description: "Create a new Agendamento",
-      tags: ["Agendamentos"],
-      body: z.object({
-        name: z.string().min(3),
-        price: z.number().min(0),
-        description: z.string().min(3),
-        quantity: z.number().min(0),
-        dataEntrega: z.date(),
-        xml: z.string(),
-        commits: z.string(),
-        status: z.string(),
-        userCreated: z.object({
-          id: z.string(),
-          name: z.string(),
-          email: z.string(),
-        }),
-        fornecedor: z.object({
-          id: z.string(),
-          name: z.string(),
-          contact: z.string(),
-        }),
-      }),
-      response: {
-        201: z.object({
-          id: z.string().uuid(),
-          name: z.string(),
-          price: z.number(),
-          description: z.string(),
-          quantity: z.number(),
-          status: z.string(),
-          createdAt: z.string(),
-          updatedAt: z.string(),
-        }),
-        400: z.object({
-          message: z.string(),
-          error: z.string(),
-          statusCode: z.number(),
-        }),
-      },
-    },
-  }, (request, reply) => {
-    const {
-      name,
-      price,
-      description,
-      quantity,
-      dataEntrega,
-      xml,
-      commits,
-      status,
-      userCreated,
-      fornecedor,
-    } = request.body as Agendamento;
-  
-    const newAgendamento: Agendamento = {
-      id: randomUUID(),
-      name,
-      description,
-      price,
-      quantity,
-      dataEntrega,
-      xml,
-      commits,
-      status,
-      createdAt: new Date(), // Set createdAt during creation
-      updatedAt: new Date(), // Set updatedAt during creation
-      userCreated,
-      userUpdated: userCreated,
-      fornecedor,
-      userId: userCreated.id,
-      userName: userCreated.name,
-      userEmail: userCreated.email,
-    };
-  
-    Agendamentos.push(newAgendamento);
-  
-    return reply.status(201).send(newAgendamento);
-  });
-  
+    app.post("/Agendamentos", {
+        schema: {
+            description: "Create a new Agendamento",
+            tags: ["Agendamentos"],
+            body: z.object({
+                name: z.string().min(3),
+                price: z.number().min(0),
+                description: z.string().min(3),
+                quantity: z.number().min(0),
+                dataEntrega: z.date(),
+                xml: z.string(),
+                commits: z.string(),
+                status: z.string(),
+                userCreated: z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    email: z.string(),
+                }),
+                fornecedor: z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    contact: z.string(),
+                }),
+            }),
+            response: {
+                201: z.object({
+                    id: z.string().uuid(),
+                    name: z.string(),
+                    price: z.number(),
+                    description: z.string(),
+                    quantity: z.number(),
+                    status: z.string(),
+                    createdAt: z.string(),
+                    updatedAt: z.string(),
+                }),
+                400: z.object({
+                    message: z.string(),
+                    error: z.string(),
+                    statusCode: z.number(),
+                }),
+            },
+        },
+    }, (request, reply) => {
+        const {
+            name,
+            price,
+            description,
+            quantity,
+            dataEntrega,
+            xml,
+            commits,
+            status,
+            userCreated,
+            fornecedor,
+        } = request.body as Agendamento;
+
+        const newAgendamento: Agendamento = {
+            id: randomUUID(),
+            name,
+            description,
+            price,
+            quantity,
+            dataEntrega,
+            xml,
+            commits,
+            status,
+            createdAt: new Date(), // Set createdAt during creation
+            updatedAt: new Date(), // Set updatedAt during creation
+            userCreated,
+            userUpdated: userCreated,
+            fornecedor,
+            userId: userCreated.id,
+            userName: userCreated.name,
+            userEmail: userCreated.email,
+        };
+
+        Agendamentos.push(newAgendamento);
+
+        return reply.status(201).send(newAgendamento);
+    });
+
     // 🔹 Rota para atualizar Agendamento
     // PUT /Agendamentos/:id
-app.put("/Agendamentos/:id", {
-    schema: {
-      description: "Update an Agendamento",
-      tags: ["Agendamentos"],
-      params: z.object({ id: z.string().uuid("Invalid UUID format") }),
-      body: z.object({
-        name: z.string().min(3),
-        price: z.number().min(0),
-        description: z.string().min(3),
-        quantity: z.number().min(0),
-      }),
-      response: {
-        200: z.object({
-          id: z.string(),
-          name: z.string(),
-          price: z.number(),
-          description: z.string(),
-        }),
-        400: z.object({
-          message: z.string(),
-          error: z.string(),
-          statusCode: z.number(),
-        }),
-        404: z.object({
-          message: z.string(),
-          error: z.string(),
-          statusCode: z.number(),
-        }),
-      },
-    },
-  }, (request, reply) => {
-    const { id } = request.params as { id: string };
-    const { name, price, description, quantity } = request.body as {
-      name: string;
-      price: number;
-      description: string;
-      quantity: number;
-    };
-  
-    const agendamentoIndex = Agendamentos.findIndex((agendamento) => agendamento.id === id);
-    if (agendamentoIndex === -1) {
-      return reply.status(404).send({
-        message: "Agendamento not found",
-        error: "Not Found",
-        statusCode: 404,
-      });
-    }
-  
-    Agendamentos[agendamentoIndex] = {
-      ...Agendamentos[agendamentoIndex],
-      name,
-      price,
-      description,
-      quantity,
-      updatedAt: new Date(), // Update the updatedAt timestamp
-    };
-  
-    return reply.status(200).send(Agendamentos[agendamentoIndex]);
-  });
-  
+    app.put("/Agendamentos/:id", {
+        schema: {
+            description: "Update an Agendamento",
+            tags: ["Agendamentos"],
+            params: z.object({ id: z.string().uuid("Invalid UUID format") }),
+            body: z.object({
+                name: z.string().min(3),
+                price: z.number().min(0),
+                description: z.string().min(3),
+                quantity: z.number().min(0),
+            }),
+            response: {
+                200: z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    price: z.number(),
+                    description: z.string(),
+                }),
+                400: z.object({
+                    message: z.string(),
+                    error: z.string(),
+                    statusCode: z.number(),
+                }),
+                404: z.object({
+                    message: z.string(),
+                    error: z.string(),
+                    statusCode: z.number(),
+                }),
+            },
+        },
+    }, (request, reply) => {
+        const { id } = request.params as { id: string };
+        const { name, price, description, quantity } = request.body as {
+            name: string;
+            price: number;
+            description: string;
+            quantity: number;
+        };
+
+        const agendamentoIndex = Agendamentos.findIndex((agendamento) => agendamento.id === id);
+        if (agendamentoIndex === -1) {
+            return reply.status(404).send({
+                message: "Agendamento not found",
+                error: "Not Found",
+                statusCode: 404,
+            });
+        }
+
+        Agendamentos[agendamentoIndex] = {
+            ...Agendamentos[agendamentoIndex],
+            name,
+            price,
+            description,
+            quantity,
+            updatedAt: new Date(), // Update the updatedAt timestamp
+        };
+
+        return reply.status(200).send(Agendamentos[agendamentoIndex]);
+    });
+
     // 🔹 Rota para deletar Agendamento
     app.delete(
         "/Agendamentos/:id",
