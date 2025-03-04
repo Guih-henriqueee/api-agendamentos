@@ -21,20 +21,20 @@ Para rodar a API localmente, siga os passos abaixo:
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/seu-projeto.git
+git clone https://github.com/Guih-henriqueee/backend-test.git
 cd seu-projeto
 ```
 
 ### 2. Instalar dependências
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 3. Rodar a aplicação
 
 ```bash
-npm start
+pnpm start
 ```
 
 Agora, a API estará disponível em `http://localhost:3000`. Você pode acessar a documentação interativa em `http://localhost:3000/docs`.
@@ -51,6 +51,10 @@ A documentação da API está disponível via Swagger UI. Com a aplicação roda
 
 - **GET /users**: Retorna todos os usuários.
 - **POST /users**: Cria um novo usuário.
+- **GET /Agendamentos**: Lista todos os agendamentos.
+- **POST /Agendamentos**: Cria um novo agendamento.
+- **PUT /Agendamentos/{id}**: Atualiza um agendamento existente.
+- **DELETE /Agendamentos/{id}**: Deleta um agendamento.
 
 ---
 
@@ -61,13 +65,13 @@ Se você deseja contribuir para este projeto, siga os passos abaixo para configu
 ### 1. Instalar dependências de desenvolvimento
 
 ```bash
-npm install --save-dev
+pnpm install --save-dev
 ```
 
 ### 2. Executar testes
 
 ```bash
-npm run test
+pnpm run dev
 ```
 
 ---
@@ -101,5 +105,5 @@ Contribuições são sempre bem-vindas! Se você deseja contribuir com melhorias
 
 ## 📞 Contato
 
-- **Email**: developer@example.com
-- **GitHub**: [https://github.com/seu-usuario](https://github.com/seu-usuario)
+- **Email**: gmartinsdevelop@gmail.com
+- **GitHub**: [https://github.com/guih-henriqueee](https://github.com/guih-henriqueee)

@@ -3,7 +3,7 @@ import { fastifyCors } from '@fastify/cors';
 import { validatorCompiler, serializerCompiler, ZodTypeProvider, jsonSchemaTransform } from 'fastify-type-provider-zod';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
-import routes from './routes';
+import {RouteAgendamentos, RouteUsers} from './routes';
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -31,10 +31,6 @@ app.register(fastifySwagger, {
 
 
         },
-        servers: [{ 
-            url: 'http://sandbox:3000', 
-            description: 'Sand Box' 
-        }],
         components: {
             securitySchemes: {
                 apiKey: {
@@ -54,7 +50,8 @@ app.register(fastifySwaggerUi, {
     routePrefix: '/docs',
 });
 
-app.register(routes);
+app.register(RouteAgendamentos);
+app.register(RouteUsers);
 
 
 app.get('/', () => {
