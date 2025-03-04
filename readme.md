@@ -1,4 +1,6 @@
+Aqui está o arquivo `README.md` atualizado com um tópico sobre a estrutura do projeto:
 
+```markdown
 # 🚀 Projeto API - Fastify com Swagger e Zod
 
 Bem-vindo ao projeto de API usando **Fastify** com documentação gerada automaticamente via **Swagger**! Esta API está configurada para validar entradas e saídas com **Zod** e possui documentação interativa para facilitar o entendimento e uso.
@@ -58,6 +60,30 @@ A documentação da API está disponível via Swagger UI. Com a aplicação roda
 
 ---
 
+## 🗂 Estrutura do Projeto
+
+A estrutura do projeto é organizada da seguinte forma:
+
+```
+.
+├── README.md
+├── package.json
+├── src
+│   ├── auth
+│   │   └── functionAuth.ts        # Funções para geração e validação de tokens
+│   ├── routes.ts                  # Definição das rotas da API
+│   ├── schema
+│   │   └── interfaces.ts          # Definições de tipos e interfaces
+│   ├── server.ts                  # Configuração do servidor Fastify
+│   └── types
+│       └── types.ts               # Definições adicionais de tipos
+├── tsconfig.json                  # Configurações do TypeScript
+```
+
+A estrutura do diretório inclui as pastas e arquivos principais necessários para o funcionamento da API. Os diretórios como `node_modules/` e `.pnpm-store/` estão ignorados no repositório e não são versionados.
+
+---
+
 ## 🚀 Desenvolvimento
 
 Se você deseja contribuir para este projeto, siga os passos abaixo para configurar o ambiente de desenvolvimento.
@@ -107,3 +133,4 @@ Contribuições são sempre bem-vindas! Se você deseja contribuir com melhorias
 
 - **Email**: gmartinsdevelop@gmail.com
 - **GitHub**: [https://github.com/guih-henriqueee](https://github.com/guih-henriqueee)
+```
