@@ -1,11 +1,8 @@
-Aqui está o arquivo `README.md` atualizado com um tópico sobre a estrutura do projeto:
-
-```markdown
 # 🚀 Projeto API - Fastify com Swagger e Zod
 
 Bem-vindo ao projeto de API usando **Fastify** com documentação gerada automaticamente via **Swagger**! Esta API está configurada para validar entradas e saídas com **Zod** e possui documentação interativa para facilitar o entendimento e uso.
 
----
+
 
 ## ⚡ Funcionalidades
 
@@ -14,7 +11,7 @@ Bem-vindo ao projeto de API usando **Fastify** com documentação gerada automat
 - **Documentação Swagger** para visualização interativa da API.
 - **Validação de dados** com Zod e **type-safe**.
 
----
+
 
 ## 💡 Como rodar o projeto
 
@@ -41,7 +38,6 @@ pnpm start
 
 Agora, a API estará disponível em `http://localhost:3000`. Você pode acessar a documentação interativa em `http://localhost:3000/docs`.
 
----
 
 ## 📚 Documentação da API
 
@@ -51,14 +47,16 @@ A documentação da API está disponível via Swagger UI. Com a aplicação roda
 
 ### Endpoints
 
-- **GET /users**: Retorna todos os usuários.
+- **GET /users**: Lista todos os usuários.
 - **POST /users**: Cria um novo usuário.
+- **PUT /users/{id}**: Atualiza um usuário existente.
+- **DELETE /users/{id}**: Deleta um usuário.
+---
 - **GET /Agendamentos**: Lista todos os agendamentos.
 - **POST /Agendamentos**: Cria um novo agendamento.
 - **PUT /Agendamentos/{id}**: Atualiza um agendamento existente.
 - **DELETE /Agendamentos/{id}**: Deleta um agendamento.
 
----
 
 ## 🗂 Estrutura do Projeto
 
@@ -82,7 +80,7 @@ A estrutura do projeto é organizada da seguinte forma:
 
 A estrutura do diretório inclui as pastas e arquivos principais necessários para o funcionamento da API. Os diretórios como `node_modules/` e `.pnpm-store/` estão ignorados no repositório e não são versionados.
 
----
+
 
 ## 🚀 Desenvolvimento
 
@@ -100,7 +98,7 @@ pnpm install --save-dev
 pnpm run dev
 ```
 
----
+
 
 ## 🔧 Ferramentas Utilizadas
 
@@ -110,13 +108,13 @@ pnpm run dev
 - **TypeScript** - Para tipagem estática.
 - **Docker** (opcional) - Para rodar a aplicação em contêineres.
 
----
+
 
 ## ⚖️ Licença
 
 Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
----
+
 
 ## 💬 Contribuições
 
@@ -127,10 +125,9 @@ Contribuições são sempre bem-vindas! Se você deseja contribuir com melhorias
 3. Faça suas alterações e adicione testes.
 4. Envie um pull request.
 
----
+
 
 ## 📞 Contato
 
 - **Email**: gmartinsdevelop@gmail.com
 - **GitHub**: [https://github.com/guih-henriqueee](https://github.com/guih-henriqueee)
-```
