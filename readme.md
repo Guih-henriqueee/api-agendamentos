@@ -1,0 +1,105 @@
+
+# 🚀 Projeto API - Fastify com Swagger e Zod
+
+Bem-vindo ao projeto de API usando **Fastify** com documentação gerada automaticamente via **Swagger**! Esta API está configurada para validar entradas e saídas com **Zod** e possui documentação interativa para facilitar o entendimento e uso.
+
+---
+
+## ⚡ Funcionalidades
+
+- **Criação de usuários** com validação de dados.
+- **Obtenção de usuários** armazenados em um banco simulado.
+- **Documentação Swagger** para visualização interativa da API.
+- **Validação de dados** com Zod e **type-safe**.
+
+---
+
+## 💡 Como rodar o projeto
+
+Para rodar a API localmente, siga os passos abaixo:
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/seu-usuario/seu-projeto.git
+cd seu-projeto
+```
+
+### 2. Instalar dependências
+
+```bash
+npm install
+```
+
+### 3. Rodar a aplicação
+
+```bash
+npm start
+```
+
+Agora, a API estará disponível em `http://localhost:3000`. Você pode acessar a documentação interativa em `http://localhost:3000/docs`.
+
+---
+
+## 📚 Documentação da API
+
+A documentação da API está disponível via Swagger UI. Com a aplicação rodando, acesse:
+
+[Visite a documentação Swagger](http://localhost:3000/docs)
+
+### Endpoints
+
+- **GET /users**: Retorna todos os usuários.
+- **POST /users**: Cria um novo usuário.
+
+---
+
+## 🚀 Desenvolvimento
+
+Se você deseja contribuir para este projeto, siga os passos abaixo para configurar o ambiente de desenvolvimento.
+
+### 1. Instalar dependências de desenvolvimento
+
+```bash
+npm install --save-dev
+```
+
+### 2. Executar testes
+
+```bash
+npm run test
+```
+
+---
+
+## 🔧 Ferramentas Utilizadas
+
+- **Fastify** - Framework web rápido e leve.
+- **Swagger** - Para gerar e exibir a documentação da API.
+- **Zod** - Biblioteca de validação de tipos.
+- **TypeScript** - Para tipagem estática.
+- **Docker** (opcional) - Para rodar a aplicação em contêineres.
+
+---
+
+## ⚖️ Licença
+
+Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+## 💬 Contribuições
+
+Contribuições são sempre bem-vindas! Se você deseja contribuir com melhorias ou correções, siga estas etapas:
+
+1. Faça um fork do projeto.
+2. Crie uma branch para sua feature: `git checkout -b minha-feature`.
+3. Faça suas alterações e adicione testes.
+4. Envie um pull request.
+
+---
+
+## 📞 Contato
+
+- **Email**: developer@example.com
+- **GitHub**: [https://github.com/seu-usuario](https://github.com/seu-usuario)
