@@ -1,15 +1,17 @@
 import { FastifyInstance } from "fastify";
-import z from "zod";
+import z, { array, string, ZodNull } from "zod";
 import { randomUUID } from "node:crypto";
 import fastifyMultipart from "@fastify/multipart";
-import { User, Agendamento } from './schema/interfaces'
+import { User, Agendamento, Fornecedor } from './schema/interfaces'
 import { createDeflate } from "node:zlib";
 import { create } from "node:domain";
 import { GetAuth, validateToken } from './auth/functionAuth'
+import { appendFile } from "node:fs";
 
 // Banco de dados simulado
 const users: User[] = [];
 const Agendamentos: Agendamento[] = [];
+const Fornecedores: Fornecedor[] = [];
 
 export async function RouteUsers(app: FastifyInstance) {
 
@@ -19,7 +21,7 @@ export async function RouteUsers(app: FastifyInstance) {
 
     // 🔹 Rota para obter usuários
     app.get(
-        "/users",
+        "/Users",
         {
             schema: {
                 description: "Get all users",
@@ -39,7 +41,7 @@ export async function RouteUsers(app: FastifyInstance) {
     );
     //  Rota para criar usuário
 
-    app.post("/users", {
+    app.post("/Users", {
         schema: {
             description: "Create a new user",
             tags: ["Users"],
@@ -47,7 +49,7 @@ export async function RouteUsers(app: FastifyInstance) {
                 name: z.string().min(3, "Name must be at least 3 characters long").describe("Nome do usuário"),
                 email: z.string().email("Invalid email format").describe("Email do usuário"),
                 password: z.string().min(6, "Password must be at least 6 characters long").describe("Senha do usuário"),
-                cpf: z.string().min(11, "CPF must be at least 11 characters long").describe("CPF do usuário"),
+                cpf: z.string().regex(/^\d{11}&/, "CPF must be at least 11 characters long").describe("CPF do usuário"),
             }),
             response: {
                 201: z.object({
@@ -415,3 +417,176 @@ export async function RouteAgendamentos(app: FastifyInstance) {
         }
     );
 }
+
+
+export async function RouteFornecedores(app: FastifyInstance) {
+
+    app.get(
+        "/Fornecedores",
+        {
+            schema: {
+                description: "List all Fornecedores",
+                tags: ["Fornecedores"],
+                response: {
+                    200: z.array(
+                        z.object({
+                            id: z.string(),
+                            name: z.string(),
+                            cnpj: z.string(),
+                            contact: z.string(),
+                      
+                                }),
+                                )
+                        }
+                    
+                },
+            },
+               
+        (request, reply) => Fornecedores
+        
+    );
+
+
+    app.post(
+        "/Fornecedores",
+        {
+            schema: {
+                description: "Create a new Fornecedor",
+                tags: ["Fornecedores"],
+                body: z.object({
+                    name: z.string().describe("Razão Social do Fornecedor"),
+                    cnpj: z.string().regex(/^\d{14}$/).describe("CNPJ do Fornecedor"),
+                    contact: z.string().regex(/^\d{9}$/).describe("Contato do Fornecedor"),
+                }),
+                response: {
+                    201: z.object({
+                        id: z.string(),
+                        name: z.string(),
+                        cnpj: z.string(),
+                        contact: z.string(),
+                    }),
+
+                    
+                }
+                },
+            },
+        
+        (request, reply) => {
+            const { name, cnpj, contact } = request.body as { name: string, cnpj: string, contact: string };
+            
+            const newFornecedor: Fornecedor = {
+                id: randomUUID(),
+                name,
+                cnpj,
+                contact,
+                agendamentos: ""
+            };
+            Fornecedores.push(newFornecedor);
+            
+            
+            
+            
+            return reply.status(201).send(newFornecedor);
+
+        }
+    );
+
+    app.get(
+        "/Fornecedores/:id",
+        {
+            schema: {
+                description: "Get a Fornecedor by ID",
+                tags: ["Fornecedores"],
+                params: z.object({
+                    id: z.string().describe("ID do Fornecedor"),
+                }),
+                response: {
+                    200: z.object({
+                        id: z.string(),
+                        name: z.string(),
+                        cnpj: z.string(),
+                        contact: z.string(),
+                    }),
+                }
+            },
+        },
+        (request, reply) => {
+            const { id } = request.params as { id: string };
+            const fornecedor = Fornecedores.find((f) => f.id === id);
+            if (!fornecedor) {
+                return reply.status(404).send({ message: "Fornecedor not found" });
+            }
+            return reply.status(200).send(fornecedor);
+        }
+    );
+
+
+    app.put(
+        "/Fornecedores/:id",
+        {
+            schema: {
+                description: "Update a Fornecedor by ID",
+                tags: ["Fornecedores"],
+                params: z.object({
+                    id: z.string().describe("ID do Fornecedor"),
+                }),
+                body: z.object({
+                    name: z.string().describe("Nome do Fornecedor"),
+                    cnpj: z.string().describe("CNPJ do Fornecedor"),
+                    contact: z.string().describe("Contato do Fornecedor"),
+                }),
+                response: {
+                    200: z.object({
+                        id: z.string(),
+                        name: z.string(),
+                        cnpj: z.string(),
+                        contact: z.string(),
+                    }),
+                }
+            },
+        },
+        (request, reply) => {
+            const { id } = request.params as { id: string };
+            const { name, cnpj, contact } = request.body as { name: string; cnpj: string; contact: string };
+            const fornecedor = Fornecedores.find((f) => f.id === id);
+            if (!fornecedor) {
+                return reply.status(404).send({ message: "Fornecedor not found" });
+            }
+            fornecedor.name = name;
+            fornecedor.cnpj = cnpj;
+            fornecedor.contact = contact;
+            return reply.status(200).send(fornecedor);
+        }
+    );
+
+    app.delete(
+        "/fornecedores/:id",
+        {
+            schema: {
+                description: "Delete a Fornecedor by ID",
+                tags: ["Fornecedores"],
+                params: z.object({
+                    id: z.string().describe("ID do Fornecedor"),
+                }),
+                response: {
+                    200: z.object({
+                        message: z.string(),
+                    }),
+                }
+            },
+        },
+        (request, reply) => {
+            const { id } = request.params as { id: string };
+            const index = Fornecedores.findIndex((f) => f.id === id);
+            if (index === -1) {
+                return reply.status(404).send({ message: "Fornecedor not found" });
+            }
+            Fornecedores.splice(index, 1);
+            return reply.status(200).send({ message: "Fornecedor deleted" });
+        }
+    );
+
+
+
+}
+

@@ -24,14 +24,16 @@ export interface Agendamento {
     updatedAt: Date;
     userCreated: User;
     userUpdated: User;
-    fornecedor: Forecedor;
+    fornecedor: Fornecedor;
     userId: string;
     userName: string;
     userEmail: string;
 }
 
-export interface Forecedor{
-    id: String;
+export interface Fornecedor{
+    id: string;
     name: string;
-    agendamentos: Agendamento[];
+    cnpj: string;
+    contact: string
+    agendamentos: string;
 }
