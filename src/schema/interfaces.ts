@@ -38,10 +38,10 @@ export interface Fornecedor{
     agendamentos: string;
 }
 
-export interface  Employes {
+export interface  Employee {
     id: string;
     name: string;
     document: string;
     salary: number;
-    
+    manager: string;
 }
