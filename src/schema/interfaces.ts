@@ -37,3 +37,11 @@ export interface Fornecedor{
     contact: string
     agendamentos: string;
 }
+
+export interface  Employes {
+    id: string;
+    name: string;
+    document: string;
+    salary: number;
+    
+}

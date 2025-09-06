@@ -3,7 +3,10 @@ import { fastifyCors } from '@fastify/cors';
 import { validatorCompiler, serializerCompiler, ZodTypeProvider, jsonSchemaTransform } from 'fastify-type-provider-zod';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
-import {RouteAgendamentos, RouteUsers, RouteFornecedores} from './routes';
+import { RouteEmployes} from './routes/routes';
+import { RouteAgendamentos } from './routes/agendamentos';
+import { RouteFornecedores } from './routes/fornecedores';
+import { RouteUsers } from './routes/user';
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -71,7 +74,8 @@ app.register(fastifySwaggerUi, {
 
 app.register(RouteAgendamentos);
 app.register(RouteUsers);
-app.register(RouteFornecedores)
+app.register(RouteEmployes);
+app.register(RouteFornecedores);
 
 
 app.get('/', () => {
